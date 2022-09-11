@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django_filters',
 
     'autouser',
+    'technician',
 ]
 
 MIDDLEWARE = [
