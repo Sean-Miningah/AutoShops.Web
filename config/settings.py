@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 import environ
 import os 
+from graphql_auth.settings import DEFAULTS
 
 env = environ.Env(
     DEBUG=(bool, False)
@@ -47,6 +48,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'graphene_django',
+    'graphql_auth',
+    'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
+    'django_filters',
 
     'autouser',
 ]
@@ -98,8 +102,38 @@ DATABASES = {
 }
 
 GRAPHENE = {
-    "SCHEMA": "config.schema.schema"
+    "SCHEMA": "config.schema.schema",
+    'MIDDLEWARE': [
+        'graphql_jwt.middleware.JSONWebTokenMiddleware',
+    ],
 }
+
+GRAPHQL_JWT = {
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_LONG_RUNNING_REFRESH_TOKEN': True,
+    "JWT_ALLOW_ANY_CLASSES":[
+        "graphql_auth.mutations.Register",
+        "graphql_auth.mutations.VerifyAccount",
+        "graphql_auth.mutations.ObtainJSONWebToken",
+    ]
+}
+
+DEFAULTS['LOGIN_ALLOWED_FIELDS'] = ['email']
+DEFAULTS['REGISTER_MUTATION_FIELDS'] = ['email', 'phone_number', 
+        'is_advertiser', 'photo', 'first_name', 'last_name', 'is_technician',]
+DEFAULTS['USER_NODE_FILTER_FIELDS'] = {
+    'email': ['exact'],
+    'is_active': ['exact'],
+    'status__archived': ['exact'],
+    'status__verified': ['exact'],
+    'status__secondary_email': ['exact'],
+}
+GRAPHQL_AUTH = DEFAULTS
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    "graphql_auth.backends.GraphQLAuthBackend",
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -145,3 +179,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Default user field
 AUTH_USER_MODEL = "autouser.AutoUser"
+
+# Gmail Serivices
+DEFAULT_FROM_EMAIL = env('EMAIL_HOST_USER')
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
