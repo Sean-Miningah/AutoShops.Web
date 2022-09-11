@@ -1,0 +1,36 @@
+version: "3.9"
+services: 
+  web: 
+    build: .
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    image: autoshop-api
+    container_name: autoshop-web
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - postgres_db
+  
+  postgres_db:
+    image: postgres:13
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    restart: always
+    environment: 
+      - POSTGRES_DB=autoshop
+      - POSTGRES_USER=autoshopuser
+      - POSTGRES_PASSWORD=autoshoppassword
+    container_name: postgres_db
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    container_name: autoshop_pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: root@root.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"

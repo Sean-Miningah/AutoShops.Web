@@ -261,3 +261,4 @@ cython_debug/
 # DataFiles
 .data
 ./data
+data/
