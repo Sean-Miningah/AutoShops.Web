@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'graphql_auth',
     'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
     'django_filters',
+    'channels',
 
     'autouser',
     'technician',
@@ -86,6 +87,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+ASGI_APPLICATION = 'config.asgi.application'
+
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -100,6 +103,19 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': env('POSTGRES_PORT'),
     }
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(
+                # env("REDIS_HOST"), 
+                "localhost",
+                env.int("REDIS_PORT")
+            )],
+        },
+    },
 }
 
 GRAPHENE = {
