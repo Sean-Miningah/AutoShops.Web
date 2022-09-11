@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'graphene_django',
+
     'autouser',
 ]
 
@@ -95,6 +97,9 @@ DATABASES = {
     }
 }
 
+GRAPHENE = {
+    "SCHEMA": "config.schema.schema"
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
