@@ -6,9 +6,9 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import TechnicianDetails, ShopFeedbackRating, TechnicianSpecializations
+from .models import TechnicianDetails, ShopFeedbackRating, TechnicianSpecializations, Specialization
 from .serializers import (RegisterTechnicianSerializer, TechnicianSerializer, TechnicianDetailsSerializer,
-                          ShopFeedbackRatingSerializer, TechnicianSpecializationsSerializer)
+                          ShopFeedbackRatingSerializer, TechnicianSpecializationsSerializer, SpecializationSerializer)
 
 
 class TechnicianRegisterView(GenericViewSet, CreateModelMixin):
@@ -57,6 +57,55 @@ class TechnicianLoginView(ModelViewSet):
         return Response(res)
 
     pass
+
+
+class TechnicianOnBoardingView(GenericViewSet, CreateModelMixin):
+    permission_classes = [IsAuthenticated,]
+
+    def create(self, request, *args, **kwargs):
+        #     save the technician details
+        user = request.user
+        specializations = request.data['specializations']
+        technician = TechnicianDetails(
+            autouser=user,
+            lat=request.data['lat'],
+            lng=request.data['lng'],
+            profile_picture=request.data['profile_pic'],
+            shop_description=request.data['shop_description'],
+            shop_goal=request.data['shop_goal'],
+        )
+        technician.save()
+
+        # Save the specializations
+        for data in specializations:
+            specialization = Specialization.objects.get(id=data)
+            specialize = TechnicianSpecializations()
+            specialize.save()
+            specialize.technician.add(user)
+            specialize.specialization.add(specialization)
+
+        return Response(
+            {
+                "message": "You have successfully registered, Login in to access the application."
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+
+class TechnicianFeedView(GenericViewSet, CreateModelMixin):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TechnicianDetailsSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return TechnicianDetails.objects.filter().exclude(autouser=user)
+
+
+class SpecializationsView(ModelViewSet):
+    http_methods_names = ['head', 'get']
+    permission_classes = [IsAuthenticated]
+    queryset = Specialization.objects.all()
+    serializer = SpecializationSerializer
 
 
 class TechnicianView(ModelViewSet):

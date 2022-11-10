@@ -80,3 +80,18 @@ class FavouriteTechnicianView(ModelViewSet):
         user = self.request.user
         return AutoUserFavourite.objects.filter(auto_user=user)
 
+    def create(self, request, *args, **kwargs):
+        user = self.request.user
+        technician = TechnicianDetails.objects.get(id=request.data['technician'])
+        favourite = AutoUserFavourite()
+        favourite.save()
+        favourite.auto_user.add(user)
+        favourite.technician.add(technician.autouser)
+        serializer = AutoUserFavouritesSerializer(instance=favourite)
+        return Response(
+            {
+                "favourites": serializer.data,
+                "message": "Added Favourites"
+            },
+            status=status.HTTP_201_CREATED,
+        )

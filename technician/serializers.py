@@ -35,7 +35,6 @@ class SkillBadgeSerializer(serializers.ModelSerializer):
 
 
 class TechnicianSerializer(serializers.ModelSerializer):
-    # secondary_details = TechnicianDetailsSerializer()
 
     class Meta:
         model = User
