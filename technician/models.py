@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
+from django.db import models
+
 AutoUser = get_user_model()
 
-from django.db import models
 
 class SkillBadge(models.Model):
     BADGE_OPTIONS = (
@@ -14,8 +15,10 @@ class SkillBadge(models.Model):
     def __str__(self):
         return self.badge
 
+
 class TechnicianDetails(models.Model):
-    autouser = models.ForeignKey(AutoUser, on_delete=models.CASCADE) # should implement a an optional one to one relation with the auto user
+    autouser = models.ForeignKey(AutoUser,
+                                 on_delete=models.CASCADE)  # should implement a an optional one to one relation with the auto user
     lat = models.CharField(max_length=30, blank=True)
     lng = models.CharField(max_length=30, blank=True)
     profile_picture = models.ImageField(upload_to='photos/technician/', default='default_technician_photo')
@@ -26,7 +29,6 @@ class TechnicianDetails(models.Model):
 
     def __str__(self):
         return str(self.id) + ' -- name is ' + str(self.autouser)
-
 
 
 class Specialization(models.Model):
@@ -43,19 +45,20 @@ class Specialization(models.Model):
     def __str__(self):
         return self.name
 
+
 class TechnicianSpecializations(models.Model):
-    technician = models.ManyToManyField(TechnicianDetails, blank = True)
-    specialization = models.ManyToManyField(Specialization, blank=True)
+    technician = models.ManyToManyField(TechnicianDetails, blank=True, related_name="technician_specialization")
+    specialization = models.ManyToManyField(Specialization, blank=True, related_name="specializations")
 
 
 class ShopFeedbackRating(models.Model):
-    technician = models.ForeignKey(TechnicianDetails, 
-            null=True, on_delete=models.SET_NULL)
+    technician = models.ForeignKey(TechnicianDetails,
+                                   null=True, on_delete=models.SET_NULL, related_name="technician_feedback")
     description = models.TextField()
     rating = models.FloatField()
     date = models.DateField(auto_now=True)
-    autouser = models.ForeignKey(AutoUser, null=True, 
-            on_delete=models.SET_NULL)
+    autouser = models.ForeignKey(AutoUser, null=True,
+                                 on_delete=models.SET_NULL)
 
     def __str__(self):
         return str(self.date)

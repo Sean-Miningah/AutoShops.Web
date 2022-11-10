@@ -6,7 +6,7 @@ from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
 from django.apps import apps
 
-from autouser.models import AutoUser
+from autouser.models import AutoUser, AutoUserFavourite
 
 
 class UserCreationForm(forms.ModelForm):
@@ -77,6 +77,20 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = ()
 
 
+class AutoUserFavouriteAdmin(admin.ModelAdmin):
+    search_fields = ('auto_user', 'technician')
+    list_display = ('date',)
+
+    fieldsets = (
+        (None, {'fields': ('auto_user', 'technician',)}),
+    )
+
+    add_fieldsets = (
+        (None, {'fields': ('auto_user', 'technician',)}),
+    )
+
+
+admin.site.register(AutoUserFavourite, AutoUserFavouriteAdmin)
 # Now register the new UserAdmin...
 admin.site.register(AutoUser, UserAdmin)
 # ... and, since we're not using Django's built-in permissions,

@@ -21,10 +21,9 @@ class CustomAccountManager(BaseUserManager):
         user = self.create_user(email, password)
         user.is_superuser = True 
         user.is_staff = True 
-        user.save() 
-
-
+        user.save()
         return user
+
 
 class AutoUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=20, blank=False)
@@ -43,13 +42,14 @@ class AutoUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomAccountManager()
 
     USERNAME_FIELD = 'email'
-    EMAIL_FIELD='email'
+    EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.first_name + ' ' + self.last_name
 
+
 class AutoUserFavourite(models.Model):
-    auto_user = models.ManyToManyField(AutoUser, blank = True, related_name="autouserfavourite")
-    technician = models.ManyToManyField(AutoUser, blank = True, related_name="technicianfavourite")
+    auto_user = models.ManyToManyField(AutoUser, blank=True, related_name="autouserfavourite")
+    technician = models.ManyToManyField(AutoUser, blank=True, related_name="technicianfavourite")
     date = models.DateField(auto_now=True)

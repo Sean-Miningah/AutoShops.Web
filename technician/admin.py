@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from .models import (TechnicianDetails, Specialization, TechnicianSpecializations, 
-        ShopFeedbackRating, SkillBadge)
+from .models import (TechnicianDetails, Specialization, TechnicianSpecializations,
+                     ShopFeedbackRating, SkillBadge)
 
 
 class TechnicianDetailsConfig(admin.ModelAdmin):
@@ -20,8 +20,9 @@ class TechnicianDetailsConfig(admin.ModelAdmin):
         ('Description', {'fields': ('shop_description', 'shop_goal')})
     )
 
+
 class SpecializationConfig(admin.ModelAdmin):
-    list_display=('id', 'name',)
+    list_display = ('id', 'name',)
 
     fieldsets = (
         (None, {'fields': ('name',)}),
@@ -31,8 +32,9 @@ class SpecializationConfig(admin.ModelAdmin):
         (None, {'fields': ('name',)}),
     )
 
+
 class TechnicianSpecializationsConfig(admin.ModelAdmin):
-    search_fields = ('technician','specialization',)
+    search_fields = ('technician', 'specialization',)
     # list_display = ('technician', 'specialization')
 
     fieldsets = (
@@ -42,6 +44,7 @@ class TechnicianSpecializationsConfig(admin.ModelAdmin):
     add_fieldsets = (
         (None, {'fields': ('specialization', 'technician')}),
     )
+
 
 class ShopFeedbackRatingConfig(admin.ModelAdmin):
     search_fields = ('technician', 'autouser')
@@ -56,6 +59,7 @@ class ShopFeedbackRatingConfig(admin.ModelAdmin):
         (None, {'fields': ('description', 'rating')}),
         ('Stakeholders', {'fields': ('technician', 'autouser')})
     )
+
 
 class SkillBadgeConfig(admin.ModelAdmin):
     search_fields = ('badge',)
@@ -75,3 +79,5 @@ admin.site.register(Specialization, SpecializationConfig)
 admin.site.register(TechnicianSpecializations, TechnicianSpecializationsConfig)
 admin.site.register(ShopFeedbackRating, ShopFeedbackRatingConfig)
 admin.site.register(SkillBadge, SkillBadgeConfig)
+
+# local admin credentials are email - example@gmail.com, password - 0000
