@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt import views as jwtviews
 
 from autouser.views import (AutoUserRegistration, AutoUserLogin, TechnicianListingsView, FavouriteTechnicianView,
-                            AutoUserView)
+                            AutoUserView, TechnicianBookingView)
 from technician.views import (SpecializationsView,)
 
 router = DefaultRouter()
@@ -14,7 +14,7 @@ router.register("account", AutoUserView, basename="autouser-account")
 router.register("technician-listing", TechnicianListingsView, basename="technician-listings")
 router.register('technician-specializations', SpecializationsView, basename="tech-specialization")
 router.register("favourites", FavouriteTechnicianView, basename="favourite-technician")
-
+router.register("bookings", TechnicianBookingView, basename="autouser-bookings")
 
 urlpatterns = [
     path('', include(router.urls)),
