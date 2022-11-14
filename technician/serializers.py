@@ -80,7 +80,7 @@ class TechnicianBookingsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Bookings
-        fields = ('date', 'time', 'auto_user', 'technician', 'technician_description', 'autouser_description')
+        fields = ('date', 'time', 'auto_user', 'technician', 'technician_description', 'autouser_description', 'status')
         extra_kwargs = {'autouser_description': {'read_only': True}}
         depth = 1
 
@@ -89,5 +89,5 @@ class AutoUserBookingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bookings
         fields = ('date', 'time', 'auto_user', 'technician', 'technician_description', 'autouser_description')
-        extra_kwargs = {'technician_description': {'read_only': True}}
+        extra_kwargs = {'technician_description': {'read_only': True}, 'status': {'read_only': True}}
         depth = 1
