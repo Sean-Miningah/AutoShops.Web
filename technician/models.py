@@ -63,3 +63,15 @@ class ShopFeedbackRating(models.Model):
 
     def __str__(self):
         return str(self.date)
+
+
+class Bookings(models.Model):
+    date = models.DateField()
+    time = models.TimeField()
+    auto_user = models.ForeignKey(AutoUser, blank=True, related_name="autouser_booking")
+    technician = models.ForeignKey(TechnicianDetails, blank=True, related_name="technician_booking")
+    autouser_description = models.TextField()
+    technician_description = models.TextField()
+
+    def __str__(self):
+        return str(self.auto_user)+' '+str(self.technician)
