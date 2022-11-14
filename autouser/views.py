@@ -1,15 +1,15 @@
 from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.viewsets import GenericViewSet, ViewSet, ModelViewSet
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, DestroyModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, DestroyModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 
 from .models import AutoUserFavourite, AutoUser
 from .serializers import RegisterAutoUserSerializer, AutoUserSerializer, AutoUserFavouritesSerializer
-from technician.serializers import TechnicianDetailsSerializer
-from technician.models import TechnicianDetails
+from technician.serializers import TechnicianDetailsSerializer, AutoUserBookingsSerializer
+from technician.models import TechnicianDetails, Bookings
 
 
 class AutoUserRegistration(GenericViewSet, CreateModelMixin):
@@ -114,7 +114,19 @@ class FavouriteTechnicianView(GenericViewSet,
         pk = kwargs.get('pk')
         user = self.request.user
         technician = AutoUser.objects.get(id=pk)
-        fav_technician = AutoUserFavourite.objects.filter(auto_user=user, technician=technician).delete()
-        return Response({
-            "message": "test"
-        })
+        AutoUserFavourite.objects.filter(auto_user=user, technician=technician).delete()
+        return Response(
+            {
+                "message": "Deleted Successfully"
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class TechnicianBookingView(GenericViewSet,
+                            CreateModelMixin,
+                            ListModelMixin,
+                            RetrieveModelMixin):
+    serializer_class=AutoUserBookingsSerializer
+    queryset=Bookings.objects.all()
+    pass
