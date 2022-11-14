@@ -6,17 +6,17 @@ from .models import (TechnicianDetails, Specialization, TechnicianSpecialization
 
 class TechnicianDetailsConfig(admin.ModelAdmin):
     search_fields = ('autouser', 'skill_badge')
-    list_display = ('rating', 'shop_goal', 'lat', 'lng', 'id')
+    list_display = ('rating', 'shop_goal', 'region', 'lng', 'id')
 
     fieldsets = (
         (None, {'fields': ('autouser', 'profile_picture', 'rating', 'skill_badge')}),
-        ('Location', {'fields': ('lat', 'lng')}),
+        ('Location', {'fields': ('region', 'lat', 'lng')}),
         ('Description', {'fields': ('shop_description', 'shop_goal')})
     )
 
     add_fieldsets = (
         (None, {'fields': ('autouser', 'profile_picture', 'rating', 'skill_badge')}),
-        ('Location', {'fields': ('lat', 'lng')}),
+        ('Location', {'fields': ('region', 'lat', 'lng')}),
         ('Description', {'fields': ('shop_description', 'shop_goal')})
     )
 

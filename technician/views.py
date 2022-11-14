@@ -105,7 +105,7 @@ class SpecializationsView(ModelViewSet):
     http_methods_names = ['head', 'get']
     permission_classes = [IsAuthenticated]
     queryset = Specialization.objects.all()
-    serializer = SpecializationSerializer
+    serializer_class = SpecializationSerializer
 
 
 class TechnicianView(ModelViewSet):

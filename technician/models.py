@@ -21,6 +21,7 @@ class TechnicianDetails(models.Model):
                                  on_delete=models.CASCADE)  # should implement a an optional one to one relation with the auto user
     lat = models.CharField(max_length=30, blank=True)
     lng = models.CharField(max_length=30, blank=True)
+    region = models.CharField(max_length=50, default="Nairobi")
     profile_picture = models.ImageField(upload_to='photos/technician/', default='default_technician_photo')
     shop_description = models.TextField()
     shop_goal = models.TextField()
