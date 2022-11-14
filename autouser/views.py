@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.viewsets import GenericViewSet, ViewSet, ModelViewSet
-from rest_framework.mixins import CreateModelMixin, ListModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, DestroyModelMixin
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -72,7 +72,10 @@ class TechnicianListingsView(GenericViewSet, ListModelMixin):
     queryset = TechnicianDetails.objects.all()
 
 
-class FavouriteTechnicianView(ModelViewSet):
+class FavouriteTechnicianView(GenericViewSet,
+                              CreateModelMixin,
+                              ListModelMixin,
+                              DestroyModelMixin):
     permission_classes = [IsAuthenticated]
     serializer_class = AutoUserFavouritesSerializer
 
@@ -95,3 +98,23 @@ class FavouriteTechnicianView(ModelViewSet):
             },
             status=status.HTTP_201_CREATED,
         )
+
+    def list(self, request, *args, **kwargs):
+        user = self.request.user
+        technicians = AutoUserFavourite.objects.filter(auto_user=user)
+        serializer = AutoUserFavouritesSerializer(technicians, many=True)
+        return Response(
+            {
+                "favourites": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        user = self.request.user
+        technician = AutoUser.objects.get(id=pk)
+        fav_technician = AutoUserFavourite.objects.filter(auto_user=user, technician=technician).delete()
+        return Response({
+            "message": "test"
+        })
