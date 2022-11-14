@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
 from technician.models import (SkillBadge, TechnicianDetails, Specialization, TechnicianSpecializations,
-                               ShopFeedbackRating,)
+                               ShopFeedbackRating, Bookings)
 
 User = get_user_model()
 
@@ -73,4 +73,21 @@ class TechnicianDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TechnicianDetails
         fields = "__all__"
+        depth = 1
+
+
+class TechnicianBookingsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Bookings
+        fields = ('date', 'time', 'auto_user', 'technician', 'technician_description', 'autouser_description')
+        extra_kwargs = {'autouser_description': {'read_only': True}}
+        depth = 1
+
+
+class AutoUserBookingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bookings
+        fields = ('date', 'time', 'auto_user', 'technician', 'technician_description', 'autouser_description')
+        extra_kwargs = {'technician_description': {'read_only': True}}
         depth = 1
