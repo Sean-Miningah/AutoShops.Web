@@ -68,8 +68,10 @@ class ShopFeedbackRating(models.Model):
 class Bookings(models.Model):
     date = models.DateField()
     time = models.TimeField()
-    auto_user = models.ForeignKey(AutoUser, blank=True, related_name="autouser_booking")
-    technician = models.ForeignKey(TechnicianDetails, blank=True, related_name="technician_booking")
+    auto_user = models.ForeignKey(AutoUser,
+                                  null=True, related_name="autouser_booking", on_delete=models.SET_NULL)
+    technician = models.ForeignKey(TechnicianDetails,
+                                   null=True, related_name="technician_booking", on_delete=models.SET_NULL)
     autouser_description = models.TextField()
     technician_description = models.TextField()
     status=models.BooleanField(default=False)
