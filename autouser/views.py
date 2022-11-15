@@ -69,7 +69,10 @@ class AutoUserView(ModelViewSet):
 class TechnicianListingsView(GenericViewSet, ListModelMixin):
     permission_classes = [IsAuthenticated]
     serializer_class = TechnicianDetailsSerializer
-    queryset = TechnicianDetails.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        return TechnicianDetails.objects.filter().exclude(autouser=user)
 
 
 class FavouriteTechnicianView(GenericViewSet,
@@ -127,6 +130,24 @@ class TechnicianBookingView(GenericViewSet,
                             CreateModelMixin,
                             ListModelMixin,
                             RetrieveModelMixin):
-    serializer_class=AutoUserBookingsSerializer
-    queryset=Bookings.objects.all()
-    pass
+    permission_classes = [IsAuthenticated]
+    serializer_class = AutoUserBookingsSerializer
+    queryset = Bookings.objects.all()
+
+    def get_queryset(self):
+        auto_user = self.request.user
+        return Bookings.objects.filter(auto_user=auto_user)
+
+    def create(self, request, *args, **kwargs):
+        auto_user = self.request.user
+        user = AutoUser.objects.get(id=auto_user.id)
+        data = request.data.copy()
+        data['auto_user'] = str(user.id)
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+            headers=headers)

@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import (TechnicianDetails, Specialization, TechnicianSpecializations,
-                     ShopFeedbackRating, SkillBadge)
+                     ShopFeedbackRating, SkillBadge, Bookings)
 
 
 class TechnicianDetailsConfig(admin.ModelAdmin):
@@ -74,10 +74,29 @@ class SkillBadgeConfig(admin.ModelAdmin):
     )
 
 
+class BookingsConfig(admin.ModelAdmin):
+    search_fields = ('auto_user', 'technician', 'status')
+    list_display = ('id', 'auto_user', 'technician', 'status')
+
+    fieldsets = (
+        ('Times', {'fields': ('date', 'time')}),
+        ('Description', {'fields': ('autouser_description', 'technician_description')}),
+        ('Stakeholders', {'fields': ('auto_user', 'technician')}),
+        ('Booking Status', {'fields': ('status',)})
+    )
+
+    add_fieldsets = (
+        ('Times', {'fields': ('date', 'time')}),
+        ('Description', {'fields': ('autouser_description', 'technician_description')}),
+        ('Stakeholders', {'fields': ('auto_user', 'technician')}),
+        ('Booking Status', {'fields': ('status',)})
+    )
+
+
 admin.site.register(TechnicianDetails, TechnicianDetailsConfig)
 admin.site.register(Specialization, SpecializationConfig)
 admin.site.register(TechnicianSpecializations, TechnicianSpecializationsConfig)
 admin.site.register(ShopFeedbackRating, ShopFeedbackRatingConfig)
 admin.site.register(SkillBadge, SkillBadgeConfig)
-
+admin.site.register(Bookings, BookingsConfig)
 # local admin credentials are email - example@gmail.com, password - 0000

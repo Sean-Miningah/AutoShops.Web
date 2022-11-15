@@ -262,3 +262,5 @@ cython_debug/
 .data
 ./data
 data/
+./.idea
+.idea

@@ -74,7 +74,7 @@ class Bookings(models.Model):
                                    null=True, related_name="technician_booking", on_delete=models.SET_NULL)
     autouser_description = models.TextField()
     technician_description = models.TextField()
-    status=models.BooleanField(default=False)
+    status = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.auto_user)+' '+str(self.technician)
