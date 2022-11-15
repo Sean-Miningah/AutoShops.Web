@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import AutoUserFavourite, AutoUser
 from .serializers import RegisterAutoUserSerializer, AutoUserSerializer, AutoUserFavouritesSerializer
 from technician.serializers import TechnicianDetailsSerializer, AutoUserBookingsSerializer
-from technician.models import TechnicianDetails, Bookings
+from technician.models import TechnicianDetails, Bookings, Specialization, TechnicianSpecializations
 
 
 class AutoUserRegistration(GenericViewSet, CreateModelMixin):
@@ -72,7 +72,13 @@ class TechnicianListingsView(GenericViewSet, ListModelMixin):
 
     def get_queryset(self):
         user = self.request.user
-        return TechnicianDetails.objects.filter().exclude(autouser=user)
+        queryset = TechnicianDetails.objects.filter().exclude(autouser=user)
+        specialist = self.request.query_params.get('specialization')
+        if specialist is not None:
+            specialization = Specialization.objects.get(id=specialist)
+            tech_specialist = TechnicianSpecializations.objects.filter(specialization=specialization)
+            queryset = queryset.filter(id__in=tech_specialist)
+        return queryset
 
 
 class FavouriteTechnicianView(GenericViewSet,
@@ -89,18 +95,25 @@ class FavouriteTechnicianView(GenericViewSet,
     def create(self, request, *args, **kwargs):
         user = self.request.user
         technician = TechnicianDetails.objects.get(id=request.data['technician'])
-        favourite = AutoUserFavourite()
-        favourite.save()
-        favourite.auto_user.add(user)
-        favourite.technician.add(technician.autouser)
-        serializer = AutoUserFavouritesSerializer(instance=favourite)
-        return Response(
-            {
-                "favourites": serializer.data,
-                "message": "Added Favourites"
-            },
-            status=status.HTTP_201_CREATED,
-        )
+        if not AutoUserFavourite.objects.filter(auto_user=user, technician=technician.autouser).exists():
+            favourite = AutoUserFavourite()
+            favourite.save()
+            favourite.auto_user.add(user)
+            favourite.technician.add(technician.autouser)
+            serializer = AutoUserFavouritesSerializer(instance=favourite)
+            return Response(
+                {
+                    "favourites": serializer.data,
+                    "message": "Added Favourites"
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        else:
+            return Response(
+                {
+                    "message": "Technician already favoured!"
+                }
+            )
 
     def list(self, request, *args, **kwargs):
         user = self.request.user
@@ -116,8 +129,8 @@ class FavouriteTechnicianView(GenericViewSet,
     def destroy(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
         user = self.request.user
-        technician = AutoUser.objects.get(id=pk)
-        AutoUserFavourite.objects.filter(auto_user=user, technician=technician).delete()
+        technician = TechnicianDetails.objects.get(id=pk)
+        AutoUserFavourite.objects.filter(auto_user=user, technician=technician.autouser).delete()
         return Response(
             {
                 "message": "Deleted Successfully"
@@ -132,7 +145,6 @@ class TechnicianBookingView(GenericViewSet,
                             RetrieveModelMixin):
     permission_classes = [IsAuthenticated]
     serializer_class = AutoUserBookingsSerializer
-    queryset = Bookings.objects.all()
 
     def get_queryset(self):
         auto_user = self.request.user
