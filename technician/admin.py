@@ -6,7 +6,7 @@ from .models import (TechnicianDetails, Specialization, TechnicianSpecialization
 
 class TechnicianDetailsConfig(admin.ModelAdmin):
     search_fields = ('autouser', 'skill_badge')
-    list_display = ('rating', 'shop_goal', 'region', 'lng', 'id')
+    list_display = ('id', 'autouser', 'rating', 'shop_goal', 'region')
 
     fieldsets = (
         (None, {'fields': ('autouser', 'profile_picture', 'rating', 'skill_badge')}),
