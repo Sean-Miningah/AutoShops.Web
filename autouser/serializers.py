@@ -2,6 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
 from autouser.models import AutoUserFavourite
+from technician.models import TechnicianDetails
+
 
 User = get_user_model()
 
@@ -27,15 +29,23 @@ class RegisterAutoUserSerializer(serializers.ModelSerializer):
 
 
 class AutoUserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
         fields = '__all__'
 
 
+class TechnicianSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TechnicianDetails
+        fields = '__all__'
+        depth = 1
+
+
 class AutoUserFavouritesSerializer(serializers.ModelSerializer):
+    # technician = TechnicianSerializer(many=True)
 
     class Meta:
         model = AutoUserFavourite
         fields = '__all__'
-        depth = 1
+        depth = 2

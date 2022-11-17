@@ -118,11 +118,13 @@ class FavouriteTechnicianView(GenericViewSet,
     def list(self, request, *args, **kwargs):
         user = self.request.user
         technicians = AutoUserFavourite.objects.filter(auto_user=user)
-        serializer = AutoUserFavouritesSerializer(technicians, many=True)
+        tech = []
+        for technician in technicians:
+            tech.append(TechnicianDetails.objects.get(autouser=technician.technician.values_list('id', flat=True)[0]))
+        # serializer = AutoUserFavouritesSerializer(technicians, many=True)
+        serial = TechnicianDetailsSerializer(tech, many=True)
         return Response(
-            {
-                "favourites": serializer.data,
-            },
+            serial.data,
             status=status.HTTP_200_OK,
         )
 
