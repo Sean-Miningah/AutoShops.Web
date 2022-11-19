@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.viewsets import GenericViewSet, ViewSet, ModelViewSet
@@ -155,13 +156,17 @@ class TechnicianBookingView(GenericViewSet,
     def create(self, request, *args, **kwargs):
         auto_user = self.request.user
         user = AutoUser.objects.get(id=auto_user.id)
-        data = request.data.copy()
-        data['auto_user'] = str(user.id)
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
+        data = self.request.data
+        booking = Bookings.objects.create(
+            date=datetime.strptime(data['date'], '%Y-%m-%d').date(),
+            time=datetime.strptime(data['time'], '%H:%M').time(),
+            auto_user=self.request.user,
+            technician=TechnicianDetails.objects.get(id=data['technician']),
+            autouser_description=data['autouser_description']
+        )
+
+        serializer = self.get_serializer(booking)
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED,
-            headers=headers)
+        )
