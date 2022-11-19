@@ -28,13 +28,13 @@ class RegisterTechnicianSerializer(serializers.ModelSerializer):
 
 
 class SkillBadgeSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = SkillBadge
         fields = "__all__"
 
 
 class TechnicianSerializer(serializers.ModelSerializer):
+    photo = serializers.ImageField(max_length=None, use_url=True)
 
     class Meta:
         model = User
@@ -44,14 +44,12 @@ class TechnicianSerializer(serializers.ModelSerializer):
 
 
 class SpecializationSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Specialization
         fields = "__all__"
 
 
 class TechnicianSpecializationsSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = TechnicianSpecializations
         fields = "__all__"
@@ -69,6 +67,7 @@ class TechnicianDetailsSerializer(serializers.ModelSerializer):
     technician_specialization = TechnicianSpecializationsSerializer(many=True)
     technician_feedback = ShopFeedbackRatingSerializer(many=True, read_only=True)
     skill_badge = SkillBadgeSerializer()
+    profile_picture = serializers.ImageField(max_length=None, use_url=True)
 
     class Meta:
         model = TechnicianDetails
@@ -77,7 +76,6 @@ class TechnicianDetailsSerializer(serializers.ModelSerializer):
 
 
 class TechnicianBookingsSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Bookings
         fields = ('date', 'time', 'auto_user', 'technician', 'technician_description', 'autouser_description', 'status')
@@ -88,7 +86,7 @@ class TechnicianBookingsSerializer(serializers.ModelSerializer):
 class AutoUserBookingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bookings
-        fields = ('date', 'time',
+        fields = ('id', 'date', 'time',
                   'auto_user', 'technician', 'technician_description', 'autouser_description', 'status')
         read_only_fields = ['technician_description', 'status']
         depth = 1
