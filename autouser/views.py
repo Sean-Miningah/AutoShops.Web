@@ -44,7 +44,7 @@ class AutoUserLogin(ViewSet, CreateModelMixin):
             }
             return Response(res, status.HTTP_401_UNAUTHORIZED)
 
-        serializer = AutoUserSerializer(user)
+        serializer = AutoUserSerializer(user, context={'request': request})
 
         token = RefreshToken.for_user(user)
         refresh_token = str(token)
@@ -123,7 +123,7 @@ class FavouriteTechnicianView(GenericViewSet,
         for technician in technicians:
             tech.append(TechnicianDetails.objects.get(autouser=technician.technician.values_list('id', flat=True)[0]))
         # serializer = AutoUserFavouritesSerializer(technicians, many=True)
-        serial = TechnicianDetailsSerializer(tech, many=True)
+        serial = TechnicianDetailsSerializer(tech, many=True, context={'request': request})
         return Response(
             serial.data,
             status=status.HTTP_200_OK,
