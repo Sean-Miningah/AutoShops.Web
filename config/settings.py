@@ -91,7 +91,7 @@ else:
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'autoshopsdb',
             'USER': 'postgres',
-            'PASSWORD': 'ROOT',
+            'PASSWORD': '0000',
             'HOST': '127.0.0.1',
             'PORT': '5432',
         }
