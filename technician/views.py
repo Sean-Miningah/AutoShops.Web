@@ -8,7 +8,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import TechnicianDetails, ShopFeedbackRating, TechnicianSpecializations, Specialization
 from .serializers import (RegisterTechnicianSerializer, TechnicianSerializer, TechnicianDetailsSerializer,
-                          ShopFeedbackRatingSerializer, TechnicianSpecializationsSerializer, SpecializationSerializer)
+                          ShopFeedbackRatingSerializer, TechnicianSpecializationsSerializer, SpecializationSerializer,
+                          TechnicianLoginSerializer)
 
 
 class TechnicianRegisterView(GenericViewSet, CreateModelMixin):
@@ -28,10 +29,9 @@ class TechnicianRegisterView(GenericViewSet, CreateModelMixin):
             headers=headers
         )
 
-    pass
 
+class TechnicianLoginView(GenericViewSet, CreateModelMixin):
 
-class TechnicianLoginView(ModelViewSet):
     def create(self, request, *args, **kwargs):
         email = request.data.get('email')
         password = request.data.get('password')
@@ -43,8 +43,9 @@ class TechnicianLoginView(ModelViewSet):
             }
             return Response(res)
 
-        serializer = TechnicianSerializer(user)
-
+        technician = TechnicianDetails.objects.get(autouser=user)
+        # serializer = TechnicianSerializer(user, context={'request': request})
+        serializer = TechnicianLoginSerializer(technician, context={'request': request})
         token = RefreshToken.for_user(user)
         refresh_token = str(token)
         access_token = str(token.access_token)
@@ -56,11 +57,9 @@ class TechnicianLoginView(ModelViewSet):
         }
         return Response(res)
 
-    pass
-
 
 class TechnicianOnBoardingView(GenericViewSet, CreateModelMixin):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
 
     def create(self, request, *args, **kwargs):
         #     save the technician details
@@ -102,15 +101,13 @@ class TechnicianFeedView(GenericViewSet, CreateModelMixin):
 
 
 class SpecializationsView(ModelViewSet):
-    http_methods_names = ['head', 'get']
     permission_classes = [IsAuthenticated]
     queryset = Specialization.objects.all()
     serializer_class = SpecializationSerializer
 
 
 class TechnicianView(ModelViewSet):
-    http_method_names = ['head', 'get']
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
     queryset = TechnicianDetails.objects.all()
     serializer_class = TechnicianDetailsSerializer
 
@@ -119,13 +116,12 @@ class TechnicianView(ModelViewSet):
 
 
 class TechnicianSpecializationView(ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
     queryset = TechnicianSpecializations.objects.all()
     serializer_class = TechnicianSpecializationsSerializer
 
 
 class TechnicianFeedbackView(ModelViewSet):
-    http_method_names = ['get', 'post', 'head', 'put', 'delete']
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
     queryset = ShopFeedbackRating.objects.all()
     serializer_class = ShopFeedbackRatingSerializer
