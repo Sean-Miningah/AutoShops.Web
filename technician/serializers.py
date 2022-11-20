@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework.relations import SlugRelatedField
 
 from technician.models import (SkillBadge, TechnicianDetails, Specialization, TechnicianSpecializations,
                                ShopFeedbackRating, Bookings)
@@ -11,6 +12,7 @@ class RegisterTechnicianSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password')
+        validated_data.pop('is_technician')
         user = User(
             is_technician=True,
             **validated_data
@@ -75,6 +77,26 @@ class ShopFeedbackRatingSerializer(serializers.ModelSerializer):
         depth = 1
 
 
+class TechnicianReviewsSerializer(serializers.ModelSerializer):
+    # reviewer_photo = serializers.SlugRelatedField(read_only, slug_field='auto')
+    # reviewer = serializers.SerializerMethodField()
+
+
+    # def get_reviewer(self, instance):
+    #     return slugify(
+    #         instance.technician.autouser.first_name + ' ' +instance.technician.autouser.last_name
+    #     )
+    #
+    # def get_reviewer_photo(self, instance):
+    #     return slugify(instance.technician.autouser.)
+
+    autouser = TechnicianSerializer()
+
+    class Meta:
+        model = ShopFeedbackRating
+        fields = ('autouser', 'description', 'rating', 'date', 'autouser')
+
+
 class TechnicianDetailsSerializer(serializers.ModelSerializer):
     technician_specialization = TechnicianSpecializationsSerializer(many=True)
     technician_feedback = ShopFeedbackRatingSerializer(many=True, read_only=True)
@@ -88,9 +110,13 @@ class TechnicianDetailsSerializer(serializers.ModelSerializer):
 
 
 class TechnicianBookingsSerializer(serializers.ModelSerializer):
+    auto_user = TechnicianSerializer()
+    technician = TechnicianLoginSerializer()
+    technician_description = serializers.CharField(allow_null=True)
+
     class Meta:
         model = Bookings
-        fields = ('date', 'time', 'auto_user', 'technician', 'technician_description', 'autouser_description', 'status')
+        fields = ('id', 'date', 'time', 'auto_user', 'technician', 'technician_description', 'autouser_description', 'status')
         extra_kwargs = {'autouser_description': {'read_only': True}}
         depth = 1
 
