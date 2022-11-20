@@ -2,14 +2,15 @@ from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.mixins import CreateModelMixin, ListModelMixin
+from rest_framework.mixins import (CreateModelMixin, ListModelMixin, DestroyModelMixin, RetrieveModelMixin,
+                                   UpdateModelMixin)
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import TechnicianDetails, ShopFeedbackRating, TechnicianSpecializations, Specialization
+from .models import TechnicianDetails, ShopFeedbackRating, TechnicianSpecializations, Specialization, Bookings
 from .serializers import (RegisterTechnicianSerializer, TechnicianSerializer, TechnicianDetailsSerializer,
                           ShopFeedbackRatingSerializer, TechnicianSpecializationsSerializer, SpecializationSerializer,
-                          TechnicianLoginSerializer)
+                          TechnicianLoginSerializer, TechnicianReviewsSerializer, TechnicianBookingsSerializer)
 
 
 class TechnicianRegisterView(GenericViewSet, CreateModelMixin):
@@ -41,21 +42,26 @@ class TechnicianLoginView(GenericViewSet, CreateModelMixin):
             res = {
                 "message": "Invalid username/password"
             }
-            return Response(res)
+            return Response(res, status=status.HTTP_401_UNAUTHORIZED)
 
-        technician = TechnicianDetails.objects.get(autouser=user)
-        # serializer = TechnicianSerializer(user, context={'request': request})
-        serializer = TechnicianLoginSerializer(technician, context={'request': request})
         token = RefreshToken.for_user(user)
         refresh_token = str(token)
         access_token = str(token.access_token)
+        try:
+            technician = TechnicianDetails.objects.get(autouser=user)
+            serializer = TechnicianLoginSerializer(technician, context={'request': request})
+            state = "Complete"
+        except TechnicianDetails.DoesNotExist:
+            serializer = TechnicianSerializer(user, context={'request': request})
+            state = "OnBoard"
 
         res = {
             "data": serializer.data,
             "access_token": access_token,
-            "refresh_token": refresh_token
+            "refresh_token": refresh_token,
+            "state": state
         }
-        return Response(res)
+        return Response(res, status=status.HTTP_200_OK)
 
 
 class TechnicianOnBoardingView(GenericViewSet, CreateModelMixin):
@@ -64,7 +70,6 @@ class TechnicianOnBoardingView(GenericViewSet, CreateModelMixin):
     def create(self, request, *args, **kwargs):
         #     save the technician details
         user = request.user
-        specializations = request.data['specializations']
         technician = TechnicianDetails(
             autouser=user,
             lat=request.data['lat'],
@@ -74,14 +79,6 @@ class TechnicianOnBoardingView(GenericViewSet, CreateModelMixin):
             shop_goal=request.data['shop_goal'],
         )
         technician.save()
-
-        # Save the specializations
-        for data in specializations:
-            specialization = Specialization.objects.get(id=data)
-            specialize = TechnicianSpecializations()
-            specialize.save()
-            specialize.technician.add(user)
-            specialize.specialization.add(specialization)
 
         return Response(
             {
@@ -106,22 +103,63 @@ class SpecializationsView(ModelViewSet):
     serializer_class = SpecializationSerializer
 
 
-class TechnicianView(ModelViewSet):
+class TechnicianView(GenericViewSet, CreateModelMixin, ListModelMixin):
     permission_classes = [IsAuthenticated]
     queryset = TechnicianDetails.objects.all()
     serializer_class = TechnicianDetailsSerializer
 
     def list(self, request, *args, **kwargs):
-        pass
+        technician = TechnicianDetails.objects.get(autouser=request.user)
+        serializer = TechnicianLoginSerializer(technician, context={'request': request})
+
+        return Response(
+            {
+                "data": serializer.data
+            }
+        )
 
 
-class TechnicianSpecializationView(ModelViewSet):
+class TechnicianSpecializationView(GenericViewSet, CreateModelMixin, RetrieveModelMixin, DestroyModelMixin):
     permission_classes = [IsAuthenticated]
     queryset = TechnicianSpecializations.objects.all()
     serializer_class = TechnicianSpecializationsSerializer
 
+    def create(self, request, *args, **kwargs):
+        user = TechnicianDetails.objects.get(autouser=request.user)
+        # Save the specializations
+        for data in request.data:
+            specialization = Specialization.objects.get(id=data['specialization'])
+            specialize = TechnicianSpecializations()
+            specialize.save()
+            specialize.technician.add(user)
+            specialize.specialization.add(specialization)
 
-class TechnicianFeedbackView(ModelViewSet):
+        return Response({
+            "message": "specialization(s) added"
+        })
+
+
+class TechnicianFeedbackView(GenericViewSet, ListModelMixin):
     permission_classes = [IsAuthenticated]
     queryset = ShopFeedbackRating.objects.all()
     serializer_class = ShopFeedbackRatingSerializer
+
+    def list(self, request, *args, **kwargs):
+        user = self.request.user
+        technician = TechnicianDetails.objects.get(autouser=user)
+        reviews = ShopFeedbackRating.objects.filter(technician=technician)
+        serializer = TechnicianReviewsSerializer(reviews, many=True, context={'request': request})
+        return Response(
+            {
+                "data": serializer.data
+            }
+        )
+
+
+class TechnicianBookingsView(GenericViewSet, ListModelMixin, RetrieveModelMixin, UpdateModelMixin):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TechnicianBookingsSerializer
+
+    def get_queryset(self):
+        technician = TechnicianDetails.objects.get(autouser=self.request.user)
+        return Bookings.objects.filter(technician=technician)
