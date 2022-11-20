@@ -43,6 +43,18 @@ class TechnicianSerializer(serializers.ModelSerializer):
         )
 
 
+class TechnicianLoginSerializer(serializers.ModelSerializer):
+    autouser = TechnicianSerializer(read_only=True)
+    shop_photo = serializers.ImageField(source='profile_picture')
+    skill_badge = serializers.SlugRelatedField(read_only=True, slug_field='badge')
+
+    class Meta:
+        model = TechnicianDetails
+        fields = (
+            'autouser', 'lat', 'lng', 'region', 'shop_photo', 'shop_description', 'shop_goal', 'rating', 'skill_badge'
+        )
+
+
 class SpecializationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Specialization
