@@ -1,16 +1,20 @@
+from datetime import datetime
 from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.mixins import (CreateModelMixin, ListModelMixin, DestroyModelMixin, RetrieveModelMixin,
                                    UpdateModelMixin)
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet, ReadOnlyModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
+from drf_excel.mixins import XLSXFileMixin
+from drf_excel.renderers import XLSXRenderer
 
 from .models import TechnicianDetails, ShopFeedbackRating, TechnicianSpecializations, Specialization, Bookings
 from .serializers import (RegisterTechnicianSerializer, TechnicianSerializer, TechnicianDetailsSerializer,
                           ShopFeedbackRatingSerializer, TechnicianSpecializationsSerializer, SpecializationSerializer,
-                          TechnicianLoginSerializer, TechnicianReviewsSerializer, TechnicianBookingsSerializer)
+                          TechnicianLoginSerializer, TechnicianReviewsSerializer, TechnicianBookingsSerializer,
+                          BookingReportSerializer, ReviewsReportSerializer)
 
 
 class TechnicianRegisterView(GenericViewSet, CreateModelMixin):
@@ -36,6 +40,8 @@ class TechnicianLoginView(GenericViewSet, CreateModelMixin):
     def create(self, request, *args, **kwargs):
         email = request.data.get('email')
         password = request.data.get('password')
+
+        print(email + ' ' + password)
 
         user = authenticate(email=email, password=password)
         if user is None:
@@ -141,8 +147,12 @@ class TechnicianSpecializationView(GenericViewSet, CreateModelMixin, RetrieveMod
 
 class TechnicianFeedbackView(GenericViewSet, ListModelMixin):
     permission_classes = [IsAuthenticated]
-    queryset = ShopFeedbackRating.objects.all()
     serializer_class = ShopFeedbackRatingSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        technician = TechnicianDetails.objects.get(atouser=user)
+        return ShopFeedbackRating.objects.filter(technician=technician)
 
     def list(self, request, *args, **kwargs):
         user = self.request.user
@@ -163,3 +173,30 @@ class TechnicianBookingsView(GenericViewSet, ListModelMixin, RetrieveModelMixin,
     def get_queryset(self):
         technician = TechnicianDetails.objects.get(autouser=self.request.user)
         return Bookings.objects.filter(technician=technician)
+
+
+class BookingReportView(XLSXFileMixin, ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BookingReportSerializer
+    renderer_classes = (XLSXRenderer,)
+    filename = datetime.now().strftime("%m/%d/%Y")
+
+    def get_queryset(self):
+        user = self.request.user
+        technician = TechnicianDetails.objects.get(autouser=user)
+        bookings = Bookings.objects.filter(technician=technician)
+        return bookings
+
+
+class ReviewsReportView(XLSXFileMixin, ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ReviewsReportSerializer
+    renderer_classes = (XLSXRenderer,)
+    filename = 'reviewReport'
+
+    def get_queryset(self):
+        user = self.request.user
+        technician = TechnicianDetails.objects.get(autouser=user)
+        reviews = ShopFeedbackRating.objects.filter(technician=technician)
+        return reviews
+

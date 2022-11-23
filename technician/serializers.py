@@ -53,7 +53,8 @@ class TechnicianLoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = TechnicianDetails
         fields = (
-            'autouser', 'lat', 'lng', 'region', 'shop_photo', 'shop_description', 'shop_goal', 'rating', 'skill_badge'
+            'id', 'autouser', 'lat', 'lng', 'region', 'shop_photo', 'shop_description', 'shop_goal', 'rating',
+            'skill_badge'
         )
 
 
@@ -71,6 +72,7 @@ class TechnicianSpecializationsSerializer(serializers.ModelSerializer):
 
 
 class ShopFeedbackRatingSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = ShopFeedbackRating
         fields = "__all__"
@@ -94,7 +96,7 @@ class TechnicianReviewsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ShopFeedbackRating
-        fields = ('autouser', 'description', 'rating', 'date', 'autouser')
+        fields = ('id', 'autouser', 'description', 'rating', 'date', 'autouser')
 
 
 class TechnicianDetailsSerializer(serializers.ModelSerializer):
@@ -122,9 +124,39 @@ class TechnicianBookingsSerializer(serializers.ModelSerializer):
 
 
 class AutoUserBookingsSerializer(serializers.ModelSerializer):
+    technician = TechnicianLoginSerializer()
+
     class Meta:
         model = Bookings
         fields = ('id', 'date', 'time',
                   'auto_user', 'technician', 'technician_description', 'autouser_description', 'status')
         read_only_fields = ['technician_description', 'status']
         depth = 1
+
+
+class BookingReportSerializer(serializers.ModelSerializer):
+    customer_description = serializers.CharField(source="autouser_description")
+    customer_email = serializers.SlugRelatedField(source="auto_user", read_only=True, slug_field="email")
+    customer_first_name = serializers.SlugRelatedField(
+        source="auto_user", read_only=True, slug_field="first_name")
+    customer_last_name = serializers.SlugRelatedField(
+        source="auto_user", read_only=True, slug_field="last_name")
+    customer_phone_number = serializers.SlugRelatedField(
+        source="auto_user", read_only=True, slug_field="phone_number"
+    )
+
+    class Meta:
+        model = Bookings
+        fields = (
+            'id', 'date', 'time', 'status', 'technician_description', 'customer_description',
+            'customer_email', 'customer_first_name', 'customer_last_name', 'customer_phone_number'
+        )
+
+
+class ReviewsReportSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ShopFeedbackRating
+        fields = (
+            'id', 'description', 'rating', 'date'
+        )

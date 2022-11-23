@@ -3,10 +3,11 @@ from rest_framework.routers import DefaultRouter
 
 from technician.views import (TechnicianRegisterView, TechnicianLoginView, TechnicianView, TechnicianSpecializationView,
                               TechnicianFeedbackView, TechnicianOnBoardingView, SpecializationsView, TechnicianFeedView,
-                              TechnicianBookingsView)
+                              TechnicianBookingsView, BookingReportView, ReviewsReportView)
 
 
 router = DefaultRouter()
+reports = DefaultRouter()
 
 router.register("register", TechnicianRegisterView, basename="technician-registration")
 router.register("login", TechnicianLoginView, basename="technician-login")
@@ -18,6 +19,10 @@ router.register("technician-specializations", SpecializationsView, basename="tec
 router.register("technician-feed", TechnicianFeedView, basename="technician-feed")
 router.register("bookings", TechnicianBookingsView, basename="technician-bookings")
 
+reports.register("bookings", BookingReportView, basename="booking-reports")
+reports.register('reviews', ReviewsReportView, basename="reviews-reports")
+
 urlpatterns = [
     path('', include(router.urls)),
+    path('reports/', include(reports.urls))
 ]

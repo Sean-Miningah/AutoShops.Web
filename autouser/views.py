@@ -2,7 +2,8 @@ from datetime import datetime
 from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.viewsets import GenericViewSet, ViewSet, ModelViewSet
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, DestroyModelMixin, RetrieveModelMixin
+from rest_framework.mixins import (CreateModelMixin, ListModelMixin, DestroyModelMixin, RetrieveModelMixin,
+                                   UpdateModelMixin)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
@@ -145,7 +146,8 @@ class FavouriteTechnicianView(GenericViewSet,
 class TechnicianBookingView(GenericViewSet,
                             CreateModelMixin,
                             ListModelMixin,
-                            RetrieveModelMixin):
+                            UpdateModelMixin,
+                            RetrieveModelMixin, DestroyModelMixin):
     permission_classes = [IsAuthenticated]
     serializer_class = AutoUserBookingsSerializer
 
