@@ -10,8 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import AutoUserFavourite, AutoUser
 from .serializers import RegisterAutoUserSerializer, AutoUserSerializer, AutoUserFavouritesSerializer
-from technician.serializers import TechnicianDetailsSerializer, AutoUserBookingsSerializer
-from technician.models import TechnicianDetails, Bookings, Specialization, TechnicianSpecializations
+from technician.serializers import TechnicianDetailsSerializer, AutoUserBookingsSerializer, TechnicianReviews
+from technician.models import TechnicianDetails, Bookings, Specialization, TechnicianSpecializations, ShopFeedbackRating
 
 
 class AutoUserRegistration(GenericViewSet, CreateModelMixin):
@@ -172,3 +172,30 @@ class TechnicianBookingView(GenericViewSet,
             serializer.data,
             status=status.HTTP_201_CREATED,
         )
+
+
+class FeedbackView(ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TechnicianReviews
+
+    def get_queryset(self):
+        te = self.request.query_params.get('technician')
+        technician = TechnicianDetails.objects.get(id=te)
+        return ShopFeedbackRating.objects.filter(technician=technician)
+
+    def create(self, request, *args, **kwargs):
+        auto_user = self.request.user
+        user = AutoUser.objects.get(id=auto_user.id)
+        technician = TechnicianDetails.objects.get(id=self.request.data['technician'])
+        rating = ShopFeedbackRating.objects.create(
+            autouser=user,
+            technician=technician,
+            description=self.request.data['description'],
+            rating=self.request.data['rating']
+        )
+
+        serializer = TechnicianReviews(rating, context={'request': request})
+
+        return Response({
+            "data": serializer.data
+        })

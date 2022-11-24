@@ -78,13 +78,12 @@ class TechnicianOnBoardingView(GenericViewSet, CreateModelMixin):
         user = request.user
         technician = TechnicianDetails(
             autouser=user,
-            lat=request.data['lat'],
-            lng=request.data['lng'],
             profile_picture=request.data['profile_pic'],
             shop_description=request.data['shop_description'],
             shop_goal=request.data['shop_goal'],
         )
         technician.save()
+
 
         return Response(
             {

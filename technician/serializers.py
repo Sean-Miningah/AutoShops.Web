@@ -24,7 +24,7 @@ class RegisterTechnicianSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'first_name', 'last_name', 'photo', 'email', 'password', 'is_technician',
+            'id', 'first_name', 'last_name', 'photo', 'email', 'password', 'is_technician',
         )
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -132,6 +132,15 @@ class AutoUserBookingsSerializer(serializers.ModelSerializer):
                   'auto_user', 'technician', 'technician_description', 'autouser_description', 'status')
         read_only_fields = ['technician_description', 'status']
         depth = 1
+
+
+class TechnicianReviews(serializers.ModelSerializer):
+    technician = TechnicianLoginSerializer()
+    autouser = TechnicianSerializer()
+
+    class Meta:
+        model = ShopFeedbackRating
+        fields = '__all__'
 
 
 class BookingReportSerializer(serializers.ModelSerializer):

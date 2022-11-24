@@ -1,17 +1,14 @@
 # Pull base image
-FROM python:3.8
-
-# Set environment variables
-ENV PIP_DISABLE_PIP_VERSION_CHECK 1
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# Set work directory
-WORKDIR /code 
-
-# Install dependencies
-COPY ./requirements.txt /code/
-RUN pip3 --no-cache-dir install -r requirements.txt
-
-# Copy project
+FROM python:3.9-slim-buster
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+WORKDIR /code
+COPY requirements.txt /code/
+RUN pip install -r requirements.txt
 COPY . /code/
+
+EXPOSE 8000
+
+ CMD ["gunicorn", "--bind", ":8000", "--workers", "3", "config.wsgi:application"]
+
+#CMD gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
